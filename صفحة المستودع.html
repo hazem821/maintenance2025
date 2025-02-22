@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تطبيق الصيانة - قسم المستودع</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+            direction: rtl;
+            text-align: right;
+        }
+        header {
+            background-color: #1E3A8A;
+            padding: 20px;
+            text-align: center;
+            color: white;
+        }
+        header img {
+            width: 50px;
+            vertical-align: middle;
+        }
+        h1 {
+            display: inline-block;
+            margin-left: 10px;
+        }
+        .container {
+            width: 80%;
+            margin: 20px auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .section {
+            margin-bottom: 20px;
+        }
+        select, input, textarea, button {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #1E3A8A;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #1e2a61;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <img src="lamis-logo.png" alt="شعار شركة لميس لصناعة المنظفات">
+    <h1>تطبيق الصيانة - قسم المستودع</h1>
+</header>
+
+<div class="container">
+    <div class="section" id="warehouse-section">
+        <h2>قسم المستودع</h2>
+        <table id="requests-table" border="1">
+            <thead>
+                <tr>
+                    <th>رقم الطلب</th>
+                    <th>اسم الماكينة</th>
+                    <th>وصف العطل</th>
+                    <th>حالة القطع</th>
+                </tr>
+            </thead>
+            <tbody id="requests-tbody">
+                <!-- سيتم ملء الجدول هنا باستخدام JavaScript -->
+            </tbody>
+        </table>
+
+        <div id="details-section" style="display: none;">
+            <h3>تفاصيل الطلب</h3>
+            <p><strong>اسم الماكينة:</strong> <span id="machine-name"></span></p>
+            <table id="parts-table" border="1">
+                <thead>
+                    <tr>
+                        <th>رقم</th>
+                        <th>الصنف</th>
+                        <th>الوحدة</th>
+                        <th>الكمية</th>
+                        <th>مكان العمل</th>
+                        <th>موجود في المستودع</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <button onclick="deliverParts()">تسليم القطع</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // تحميل الطلبات من localStorage وتحديث الجدول
+    function loadRequests() {
+        const requests = JSON.parse(localStorage.getItem("pendingRequests")) || [];
+        const requestsTbody = document.getElementById("requests-tbody");
+
+        requestsTbody.innerHTML = ""; // تنظيف الجدول قبل إعادة تعبئته
+
+        requests.forEach((request, index) => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td><button onclick="showPartsDetails(${index})">${index + 1}</button></td>
+                <td>${request.machineName}</td>
+                <td>${request.issueDescription}</td>
+                <td id="status-${index}">${request.delivered ? "تم التسليم بنجاح" : "<button onclick='showPartsDetails(" + index + ")'>عرض القطع</button>"}</td>
+            `;
+            requestsTbody.appendChild(row);
+        });
+    }
+
+    // إظهار تفاصيل الطلب مع استدعاء بيانات القطع المخزنة
+    function showPartsDetails(index) {
+        const requests = JSON.parse(localStorage.getItem("pendingRequests")) || [];
+        const selectedRequest = requests[index];
+
+        localStorage.setItem("selectedRequestIndex", index); // تخزين الفهرس لاستخدامه لاحقًا
+
+        // إظهار قسم التفاصيل
+        const detailsSection = document.getElementById("details-section");
+        detailsSection.style.display = 'block';
+
+        // عرض اسم الماكينة
+        document.getElementById("machine-name").textContent = selectedRequest.machineName;
+
+        // تحديث جدول القطع من البيانات المخزنة
+        const partsTableBody = document.getElementById("parts-table").getElementsByTagName('tbody')[0];
+        partsTableBody.innerHTML = '';
+
+        selectedRequest.parts.forEach((part, i) => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td>${i + 1}</td>
+                <td>${part.item}</td>
+                <td>${part.unit}</td>
+                <td>${part.quantity}</td>
+                <td>${part.location}</td>
+                <td><input type="checkbox" name="part-${i}" class="part-checkbox"></td>
+            `;
+            partsTableBody.appendChild(row);
+        });
+    }
+
+    // عند الضغط على "تسليم القطع"
+    function deliverParts() {
+        const checkboxes = document.querySelectorAll('.part-checkbox');
+        let allChecked = true;
+
+        checkboxes.forEach(checkbox => {
+            if (!checkbox.checked) {
+                allChecked = false;
+            }
+        });
+
+        if (allChecked) {
+            alert("تم تسليم جميع القطع بنجاح!");
+
+            // تحديث حالة الطلب بدلاً من حذفه
+            const requestIndex = parseInt(localStorage.getItem("selectedRequestIndex"));
+            const requests = JSON.parse(localStorage.getItem("pendingRequests"));
+
+            requests[requestIndex].delivered = true; // تعيين حالة الطلب إلى "تم التسليم بنجاح"
+            localStorage.setItem("pendingRequests", JSON.stringify(requests));
+
+            // تحديث حالة الطلب في الجدول بدون إعادة تحميل الصفحة
+            document.getElementById(`status-${requestIndex}`).textContent = "تم التسليم بنجاح";
+        } else {
+            alert("يرجى التحقق من جميع القطع الموجودة في المستودع.");
+        }
+    }
+
+    // عند تحميل الصفحة، نقوم بتحميل الطلبات
+    document.addEventListener("DOMContentLoaded", loadRequests);
+</script>
+
+</body>
+</html>

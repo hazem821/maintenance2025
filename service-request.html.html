@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تطبيق الصيانة - قسم طالب الخدمة</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+            direction: rtl;
+            text-align: right;
+        }
+        header {
+            background-color: #1E3A8A;
+            padding: 20px;
+            text-align: center;
+            color: white;
+        }
+        header img {
+            width: 50px;
+            vertical-align: middle;
+        }
+        h1 {
+            display: inline-block;
+            margin-left: 10px;
+        }
+        .container {
+            width: 80%;
+            margin: 20px auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .section {
+            margin-bottom: 20px;
+        }
+        select, input, textarea, button {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #1E3A8A;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #1e2a61;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <img src="lamis-logo.png" alt="شعار شركة لميس لصناعة المنظفات">
+    <h1>تطبيق الصيانة - قسم طالب الخدمة</h1>
+</header>
+
+<div class="container">
+    <div class="section" id="pending-requests">
+        <h2>الطلبات المعلقة</h2>
+        <select id="requests-dropdown" onchange="handleRequestSelection(event)">
+            <option value="">اختر طلباً معلقاً</option>
+        </select>
+    </div>
+
+    <div class="section" id="service-request">
+        <h2>قسم طالب الخدمة (مشرف الصالة)</h2>
+        <form id="serviceForm" onsubmit="return submitRequest(event)">
+            <div class="form-group">
+                <label for="machine-name">اسم الماكينة:</label>
+                <input type="text" id="machine-name" placeholder="أدخل اسم الماكينة" required>
+            </div>
+
+            <div class="form-group">
+                <label for="issue-description">وصف العطل:</label>
+                <textarea id="issue-description" rows="4" placeholder="أدخل وصف العطل" required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>نوع الصيانة:</label><br>
+                <label for="maintenance-therapy">
+                    <input type="checkbox" id="maintenance-therapy"> صيانة علاجية
+                </label><br>
+                <label for="maintenance-periodic">
+                    <input type="checkbox" id="maintenance-periodic"> صيانة دورية
+                </label><br>
+                <label for="maintenance-structural">
+                    <input type="checkbox" id="maintenance-structural"> صيانة إنشائية
+                </label>
+            </div>
+
+            <button type="submit">إرسال الطلب</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    function updateRequestDropdown() {
+        const requestsDropdown = document.getElementById("requests-dropdown");
+        requestsDropdown.innerHTML = '<option value="">اختر طلباً معلقاً</option>';
+
+        const requests = JSON.parse(localStorage.getItem("pendingRequests")) || [];
+        
+        requests.forEach((request, index) => {
+            const option = document.createElement("option");
+            option.value = index;
+            option.textContent = `طلب ${index + 1}: ${request.machineName}`;
+            requestsDropdown.appendChild(option);
+        });
+    }
+
+    function submitRequest(event) {
+        event.preventDefault();
+
+        const machineName = document.getElementById("machine-name").value;
+        const issueDescription = document.getElementById("issue-description").value;
+        const maintenanceTherapy = document.getElementById("maintenance-therapy").checked;
+        const maintenancePeriodic = document.getElementById("maintenance-periodic").checked;
+        const maintenanceStructural = document.getElementById("maintenance-structural").checked;
+
+        if (!machineName || !issueDescription || (!maintenanceTherapy && !maintenancePeriodic && !maintenanceStructural)) {
+            alert("يرجى تعبئة جميع الحقول بشكل كامل.");
+            return false;
+        }
+
+        const currentDateTime = new Date().toLocaleString();
+
+        const request = {
+            machineName,
+            issueDescription,
+            maintenanceTypes: {
+                therapy: maintenanceTherapy,
+                periodic: maintenancePeriodic,
+                structural: maintenanceStructural
+            },
+            createdAt: currentDateTime
+        };
+
+        const pendingRequests = JSON.parse(localStorage.getItem("pendingRequests")) || [];
+        pendingRequests.push(request);
+        localStorage.setItem("pendingRequests", JSON.stringify(pendingRequests));
+
+        updateRequestDropdown();
+
+        window.location.href = 'service-request.html.html';
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        updateRequestDropdown();
+    });
+
+    function handleRequestSelection(event) {
+        const selectedRequestIndex = event.target.value;
+        if (selectedRequestIndex !== "") {
+            const requests = JSON.parse(localStorage.getItem("pendingRequests"));
+            const selectedRequest = requests[selectedRequestIndex];
+            sessionStorage.setItem("selectedRequest", JSON.stringify(selectedRequest));
+
+            window.location.href = 'صفحة إنهاء .html';
+        }
+    }
+</script>
+
+</body>
+</html>

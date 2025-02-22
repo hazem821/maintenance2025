@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تطبيق الصيانة - قسم مستلم الطلب</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+            direction: rtl;
+            text-align: right;
+        }
+        header {
+            background-color: #1E3A8A;
+            padding: 20px;
+            text-align: center;
+            color: white;
+        }
+        header img {
+            width: 50px;
+            vertical-align: middle;
+        }
+        h1 {
+            display: inline-block;
+            margin-left: 10px;
+        }
+        .container {
+            width: 80%;
+            margin: 20px auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .section {
+            margin-bottom: 20px;
+        }
+        select, input, textarea, button {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #1E3A8A;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #1e2a61;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <img src="lamis-logo.png" alt="شعار شركة لميس لصناعة المنظفات">
+    <h1>تطبيق الصيانة - قسم مستلم الطلب </h1>
+</header>
+<div class="container">
+    <div class="section" id="pending-requests">
+        <h2>الطلبات المعلقة</h2>
+        <select id="requests-dropdown" onchange="handleRequestSelection(event)">
+            <option value="">اختر طلباً معلقاً</option>
+        </select>
+    </div>
+
+    <div class="section" id="maintenance-request">
+        <h2>تفاصيل الطلب</h2>
+        <p><strong>اسم الماكينة:</strong> <span id="machine-name"></span></p>
+        <p><strong>وصف العطل:</strong> <span id="issue-description"></span></p>
+
+        <form id="maintenanceForm">
+            <div class="form-group">
+                <label for="receiver-name">اسم مستلم الخدمة:</label>
+                <input type="text" id="receiver-name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="condition-description">شرح الحالة والتوصيات:</label>
+                <textarea id="condition-description" rows="4" required></textarea>
+            </div>
+
+            <div class="form-group">
+                <h3>القطع اللازمة للصيانة</h3>
+                <label for="part-name">الصنف:</label>
+                <input type="text" id="part-name">
+                
+                <label for="unit">الوحدة:</label>
+                <input type="text" id="unit">
+                
+                <label for="quantity">الكمية:</label>
+                <input type="number" id="quantity">
+                
+                <label for="work-location">مكان العمل:</label>
+                <input type="text" id="work-location">
+
+                <button type="button" onclick="addPart()">إدخال</button>
+            </div>
+
+            <h3>القطع المدخلة:</h3>
+            <ul id="parts-list"></ul>
+
+            <button type="button" onclick="finishRequest()">إنهاء الطلب</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    let parts = [];
+
+    function updateRequestDropdown() {
+        const requestsDropdown = document.getElementById("requests-dropdown");
+        requestsDropdown.innerHTML = '<option value="">اختر طلباً معلقاً</option>';
+
+        const requests = JSON.parse(localStorage.getItem("pendingRequests")) || [];
+        requests.forEach((request, index) => {
+            const option = document.createElement("option");
+            option.value = index;
+            option.textContent = `طلب ${index + 1}: ${request.machineName}`;
+            requestsDropdown.appendChild(option);
+        });
+    }
+
+    function handleRequestSelection(event) {
+        const selectedRequestIndex = event.target.value;
+        if (selectedRequestIndex !== "") {
+            const requests = JSON.parse(localStorage.getItem("pendingRequests"));
+            const selectedRequest = requests[selectedRequestIndex];
+
+            document.getElementById("machine-name").textContent = selectedRequest.machineName;
+            document.getElementById("issue-description").textContent = selectedRequest.issueDescription;
+        }
+    }
+
+    function addPart() {
+        const partName = document.getElementById("part-name").value;
+        const unit = document.getElementById("unit").value;
+        const quantity = document.getElementById("quantity").value;
+        const workLocation = document.getElementById("work-location").value;
+
+        if (partName && unit && quantity && workLocation) {
+            parts.push({ item: partName, unit: unit, quantity: quantity, location: workLocation });
+
+            // تحديث قائمة العرض
+            const partsList = document.getElementById("parts-list");
+            const listItem = document.createElement("li");
+            listItem.textContent = `${partName} - ${unit} - ${quantity} - ${workLocation}`;
+            partsList.appendChild(listItem);
+
+            // إعادة تعيين المدخلات
+            document.getElementById("part-name").value = "";
+            document.getElementById("unit").value = "";
+            document.getElementById("quantity").value = "";
+            document.getElementById("work-location").value = "";
+        } else {
+            alert("يرجى إدخال جميع البيانات المطلوبة للقطعة.");
+        }
+    }
+
+    function finishRequest() {
+        const receiverName = document.getElementById("receiver-name").value;
+        const conditionDescription = document.getElementById("condition-description").value;
+
+        const requests = JSON.parse(localStorage.getItem("pendingRequests")) || [];
+        const selectedRequestIndex = document.getElementById("requests-dropdown").value;
+
+        if (selectedRequestIndex !== "") {
+            requests[selectedRequestIndex].receiverName = receiverName;
+            requests[selectedRequestIndex].conditionDescription = conditionDescription;
+            requests[selectedRequestIndex].parts = parts; // حفظ الأجزاء المدخلة بنفس الترتيب
+
+            localStorage.setItem("pendingRequests", JSON.stringify(requests));
+
+            alert("تم إنهاء الطلب بنجاح!");
+            location.reload();
+        } else {
+            alert("يرجى اختيار طلب قبل الإنهاء!");
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", updateRequestDropdown);
+</script>
+
+</body>
+</html>

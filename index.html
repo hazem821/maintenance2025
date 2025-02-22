@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل الدخول</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+            direction: rtl;
+            text-align: right;
+        }
+        header {
+            background-color: #1E3A8A;
+            padding: 20px;
+            text-align: center;
+            color: white;
+        }
+        header img {
+            width: 50px;
+            vertical-align: middle;
+        }
+        h1 {
+            display: inline-block;
+            margin-left: 10px;
+        }
+        .container {
+            width: 40%;
+            margin: 50px auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        select, input {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #1E3A8A;
+            color: white;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #1e2a61;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <img src="lamis-logo.png" alt="شعار شركة لميس لصناعة المنظفات">
+    <h1>تسجيل الدخول</h1>
+</header>
+
+<div class="container">
+    <h2>أدخل بيانات تسجيل الدخول</h2>
+    <form id="loginForm">
+        <label for="username">اسم المستخدم:</label>
+        <select id="username" required>
+            <option value="">اختر القسم</option>
+            <option value="مشرف صالة">مشرف صالة</option>
+            <option value="الصيانة">الصيانة</option>
+            <option value="الأرشيف">الأرشيف</option>
+            <option value="المستودع">المستودع</option>
+            <option value="أرشيف المستودع">أرشيف المستودع</option>
+        </select>
+
+        <label for="password">كلمة المرور:</label>
+        <input type="password" id="password" required>
+
+        <button type="submit">تسجيل الدخول</button>
+    </form>
+</div>
+
+<script>
+    document.getElementById("loginForm").addEventListener("submit", function(event) {
+        event.preventDefault();
+
+        const users = {
+            "مشرف صالة": { password: "1", redirect: "service-request.html.html" },
+            "الصيانة": { password: "2", redirect: "صفحة مستلم الطلب .html" },
+            "الأرشيف": { password: "3", redirect: "الأرشيف.html" },
+            "المستودع": { password: "4", redirect: "صفحة المستودع.html" },
+            "أرشيف المستودع": { password: "5", redirect: "أرشيف المستودع.html" }
+        };
+
+        const username = document.getElementById("username").value;
+        const password = document.getElementById("password").value.trim();
+
+        if (users[username] && users[username].password === password) {
+            window.location.href = users[username].redirect;
+        } else {
+            alert("بيانات الدخول غير صحيحة!");
+        }
+    });
+</script>
+
+</body>
+</html>

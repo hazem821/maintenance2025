@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تطبيق الصيانة - إنهاء الطلب</title>
+    <style>
+        /* تحسين تنسيق النموذج للغة العربية من اليمين لليسار */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+            direction: rtl; /* تحديد الاتجاه من اليمين لليسار */
+            text-align: right; /* محاذاة النصوص من اليمين */
+        }
+        header {
+            background-color: #1E3A8A; /* تغيير اللون إلى الأزرق */
+            padding: 20px;
+            text-align: center;
+            color: white;
+        }
+        header img {
+            width: 50px;
+            vertical-align: middle;
+        }
+        h1 {
+            display: inline-block;
+            margin-left: 10px;
+        }
+        .container {
+            width: 80%;
+            margin: 20px auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .section {
+            margin-bottom: 20px;
+        }
+        select, input, textarea, button {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #1E3A8A; /* اللون الأزرق */
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #1e2a61; /* لون أزرق أغمق عند التمرير */
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <img src="lamis-logo.png" alt="شعار شركة لميس لصناعة المنظفات">
+    <h1>تطبيق الصيانة - إنهاء الطلب</h1>
+</header>
+
+<div class="container">
+    <div class="section" id="finish-request">
+        <h2>إنهاء طلب الصيانة</h2>
+
+        <div id="request-details">
+            <!-- تفاصيل الطلب ستظهر هنا -->
+        </div>
+
+        <form id="finishForm">
+            <div class="form-group">
+                <label for="confirmation">تأكيد إجراء الصيانة:</label>
+                <select id="confirmation" required>
+                    <option value="yes">نعم</option>
+                    <option value="no">لا</option>
+                </select>
+            </div>
+
+            <button type="submit">إنهاء الطلب</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    // عند تحميل صفحة إنهاء الطلب، استرجاع بيانات الطلب المحدد
+    document.addEventListener("DOMContentLoaded", function() {
+        const selectedRequest = JSON.parse(sessionStorage.getItem("selectedRequest"));
+
+        if (selectedRequest) {
+            document.getElementById("request-details").innerHTML = `
+                <p><strong>اسم الماكينة:</strong> ${selectedRequest.machineName}</p>
+                <p><strong>وصف العطل:</strong> ${selectedRequest.issueDescription}</p>
+                <p><strong>نوع الصيانة:</strong> ${selectedRequest.maintenanceTypes.therapy ? "صيانة علاجية" : ""} 
+                   ${selectedRequest.maintenanceTypes.periodic ? "صيانة دورية" : ""} 
+                   ${selectedRequest.maintenanceTypes.structural ? "صيانة إنشائية" : ""}</p>
+                <p><strong>تاريخ الطلب:</strong> ${selectedRequest.createdAt}</p>
+            `;
+        }
+    });
+
+    document.getElementById('finishForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const confirmation = document.getElementById('confirmation').value;
+
+        if (confirmation === 'yes') {
+            // إذا كانت الإجابة نعم، يتم حذف الطلب من القائمة
+            const selectedRequestIndex = JSON.parse(sessionStorage.getItem("selectedRequestIndex"));
+            const pendingRequests = JSON.parse(localStorage.getItem("pendingRequests"));
+
+            // حذف الطلب من المصفوفة
+            pendingRequests.splice(selectedRequestIndex, 1);
+
+            // تحديث localStorage بعد الحذف
+            localStorage.setItem("pendingRequests", JSON.stringify(pendingRequests));
+
+            alert('تم إنهاء الطلب وحذفه من القائمة!');
+        } else {
+            alert('تم الرجوع إلى صفحة طالب الخدمة!');
+        }
+
+        // العودة إلى صفحة طالب الخدمة
+        window.location.href = 'service-request.html.html';
+    });
+</script>
+
+</body>
+</html>

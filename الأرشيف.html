@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تطبيق الصيانة - الأرشيف</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+            direction: rtl;
+            text-align: right;
+        }
+        header {
+            background-color: #1E3A8A;
+            padding: 20px;
+            text-align: center;
+            color: white;
+        }
+        header img {
+            width: 50px;
+            vertical-align: middle;
+        }
+        h1 {
+            display: inline-block;
+            margin-left: 10px;
+        }
+        .container {
+            width: 90%;
+            margin: 20px auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: #1E3A8A;
+            color: white;
+        }
+        button {
+            background-color: #1E3A8A;
+            color: white;
+            font-size: 16px;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            display: block;
+            margin: 20px auto;
+            width: 200px;
+        }
+        button:hover {
+            background-color: #1e2a61;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <img src="lamis-logo.png" alt="شعار شركة لميس لصناعة المنظفات">
+    <h1>تطبيق الصيانة - الأرشيف</h1>
+</header>
+
+<div class="container">
+    <h2>جدول الأرشيف</h2>
+    <table id="archive-table">
+        <thead>
+            <tr>
+                <th>رقم الطلب</th>
+                <th>تاريخ الطلب</th>
+                <th>وقت الطلب</th>
+                <th>اسم الماكينة</th>
+                <th>وصف العطل</th>
+                <th>اسم مستلم الطلب</th>
+                <th>شرح الحالة والتوصيات</th>
+                <th>القطع المطلوبة</th>
+                <th>حالة الصيانة</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- سيتم تعبئة البيانات هنا بواسطة JavaScript -->
+        </tbody>
+    </table>
+
+    <button onclick="clearArchive()">مسح الأرشيف</button>
+</div>
+
+<script>
+    function loadArchive() {
+        const archiveTableBody = document.querySelector("#archive-table tbody");
+
+        // جلب البيانات من LocalStorage بدون حذف أي بيانات
+        let requests = JSON.parse(localStorage.getItem("archiveRequests")) || [];
+        
+        archiveTableBody.innerHTML = ""; // تنظيف الجدول قبل إعادة تعبئته
+
+        requests.forEach((request, index) => {
+            const row = document.createElement("tr");
+
+            const parts = request.parts ? request.parts.map(part => `${part.item} (${part.quantity})`).join(", ") : "لا توجد قطع";
+
+            row.innerHTML = `
+                <td>${index + 1}</td>
+                <td>${request.createdAt ? request.createdAt.split(" ")[0] : "غير متوفر"}</td>
+                <td>${request.createdAt ? request.createdAt.split(" ")[1] : "غير متوفر"}</td>
+                <td>${request.machineName || "غير متوفر"}</td>
+                <td>${request.issueDescription || "غير متوفر"}</td>
+                <td>${request.receiverName || "غير متوفر"}</td>
+                <td>${request.conditionDescription || "غير متوفر"}</td>
+                <td>${parts}</td>
+                <td>${request.delivered ? "تمت الصيانة" : "قيد الانتظار"}</td>
+            `;
+
+            archiveTableBody.appendChild(row);
+        });
+    }
+
+    function clearArchive() {
+        if (confirm("هل أنت متأكد من أنك تريد مسح الأرشيف؟ لا يمكن التراجع عن هذا الإجراء!")) {
+            localStorage.removeItem("archiveRequests");
+            loadArchive();
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        let requests = JSON.parse(localStorage.getItem("pendingRequests")) || [];
+        let archiveRequests = JSON.parse(localStorage.getItem("archiveRequests")) || [];
+
+        // إضافة الطلبات المكتملة إلى الأرشيف فقط إذا لم تكن موجودة مسبقًا
+        requests.forEach(request => {
+            if (request.delivered && !archiveRequests.some(archived => archived.createdAt === request.createdAt)) {
+                archiveRequests.push(request);
+            }
+        });
+
+        localStorage.setItem("archiveRequests", JSON.stringify(archiveRequests));
+
+        loadArchive();
+    });
+</script>
+
+</body>
+</html>

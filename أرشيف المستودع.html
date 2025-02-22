@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تطبيق الصيانة - أرشيف المستودع</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+            direction: rtl;
+            text-align: right;
+        }
+        header {
+            background-color: #1E3A8A;
+            padding: 20px;
+            text-align: center;
+            color: white;
+        }
+        header img {
+            width: 50px;
+            vertical-align: middle;
+        }
+        h1 {
+            display: inline-block;
+            margin-left: 10px;
+        }
+        .container {
+            width: 90%;
+            margin: 20px auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: #1E3A8A;
+            color: white;
+        }
+        button {
+            background-color: #D32F2F;
+            color: white;
+            font-size: 16px;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            display: block;
+            margin: 20px auto;
+            width: 200px;
+        }
+        button:hover {
+            background-color: #B71C1C;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <img src="lamis-logo.png" alt="شعار شركة لميس لصناعة المنظفات">
+    <h1>تطبيق الصيانة - أرشيف المستودع</h1>
+</header>
+
+<div class="container">
+    <h2>سجل القطع المستلمة</h2>
+    <table id="warehouse-archive">
+        <thead>
+            <tr>
+                <th>رقم الطلب</th>
+                <th>اسم الماكينة</th>
+                <th>القطع المطلوبة</th>
+                <th>حالة التسليم</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- سيتم تعبئة البيانات هنا بواسطة JavaScript -->
+        </tbody>
+    </table>
+    <button onclick="clearArchive()">مسح الأرشيف</button>
+</div>
+
+<script>
+    function loadWarehouseArchive() {
+        const archiveTableBody = document.querySelector("#warehouse-archive tbody");
+        let archiveRequests = JSON.parse(localStorage.getItem("archiveRequests")) || [];
+        
+        archiveTableBody.innerHTML = "";
+
+        archiveRequests.forEach((request, index) => {
+            const row = document.createElement("tr");
+            const parts = request.parts ? request.parts.map(part => `${part.item} (${part.quantity})`).join(", ") : "لا توجد قطع";
+            const deliveryStatus = request.delivered ? "تم التسليم" : "لم يتم التسليم";
+
+            row.innerHTML = `
+                <td>${index + 1}</td>
+                <td>${request.machineName || "غير متوفر"}</td>
+                <td>${parts}</td>
+                <td>${deliveryStatus}</td>
+            `;
+
+            archiveTableBody.appendChild(row);
+        });
+    }
+
+    function saveToArchive(request) {
+        let archiveRequests = JSON.parse(localStorage.getItem("archiveRequests")) || [];
+        archiveRequests.push(request);
+        localStorage.setItem("archiveRequests", JSON.stringify(archiveRequests));
+    }
+
+    function clearArchive() {
+        if (confirm("هل أنت متأكد من أنك تريد مسح الأرشيف؟ لا يمكن التراجع عن هذا الإجراء!")) {
+            localStorage.removeItem("archiveRequests");
+            loadWarehouseArchive();
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        let pendingRequests = JSON.parse(localStorage.getItem("pendingRequests")) || [];
+        let archiveRequests = JSON.parse(localStorage.getItem("archiveRequests")) || [];
+        
+        pendingRequests.forEach(request => {
+            if (request.delivered && !archiveRequests.some(archived => archived.createdAt === request.createdAt)) {
+                archiveRequests.push(request);
+            }
+        });
+        
+        localStorage.setItem("archiveRequests", JSON.stringify(archiveRequests));
+        loadWarehouseArchive();
+    });
+</script>
+
+</body>
+</html>
