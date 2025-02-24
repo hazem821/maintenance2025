@@ -23,10 +23,7 @@
             width: 50px;
             vertical-align: middle;
         }
-        h1 {
-            display: inline-block;
-            margin-left: 10px;
-        }
+
         .container {
             width: 80%;
             margin: 20px auto;
@@ -34,9 +31,6 @@
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-        .section {
-            margin-bottom: 20px;
         }
         select, input, textarea, button {
             width: 100%;
@@ -50,9 +44,6 @@
             color: white;
             font-size: 16px;
             cursor: pointer;
-        }
-        button:hover {
-            background-color: #1e2a61;
         }
     </style>
 </head>
@@ -72,102 +63,28 @@
     </div>
 
     <div class="section" id="service-request">
-        <h2>قسم طالب الخدمة (مشرف الصالة)</h2>
+        <h2>إرسال طلب صيانة</h2>
         <form id="serviceForm" onsubmit="return submitRequest(event)">
-            <div class="form-group">
-                <label for="machine-name">اسم الماكينة:</label>
-                <input type="text" id="machine-name" placeholder="أدخل اسم الماكينة" required>
-            </div>
+            <label for="machine-name">اسم الماكينة:</label>
+            <input type="text" id="machine-name" required>
 
-            <div class="form-group">
-                <label for="issue-description">وصف العطل:</label>
-                <textarea id="issue-description" rows="4" placeholder="أدخل وصف العطل" required></textarea>
-            </div>
+            <label for="issue-description">وصف العطل:</label>
+            <textarea id="issue-description" rows="4" required></textarea>
 
-            <div class="form-group">
-                <label>نوع الصيانة:</label><br>
-                <label for="maintenance-therapy">
-                    <input type="checkbox" id="maintenance-therapy"> صيانة علاجية
-                </label><br>
-                <label for="maintenance-periodic">
-                    <input type="checkbox" id="maintenance-periodic"> صيانة دورية
-                </label><br>
-                <label for="maintenance-structural">
-                    <input type="checkbox" id="maintenance-structural"> صيانة إنشائية
-                </label>
-            </div>
+            <label for="maintenance-type">نوع الصيانة:</label>
+            <select id="maintenance-type" required>
+                <option value="">اختر نوع الصيانة</option>
+                <option value="علاجية">صيانة علاجية</option>
+                <option value="دورية">صيانة دورية</option>
+                <option value="إنشائية">صيانة إنشائية</option>
+            </select>
 
             <button type="submit">إرسال الطلب</button>
         </form>
     </div>
 </div>
 
-<script>
-    function updateRequestDropdown() {
-        const requestsDropdown = document.getElementById("requests-dropdown");
-        requestsDropdown.innerHTML = '<option value="">اختر طلباً معلقاً</option>';
-
-        const requests = JSON.parse(localStorage.getItem("pendingRequests")) || [];
-        
-        requests.forEach((request, index) => {
-            const option = document.createElement("option");
-            option.value = index;
-            option.textContent = `طلب ${index + 1}: ${request.machineName}`;
-            requestsDropdown.appendChild(option);
-        });
-    }
-
-    function submitRequest(event) {
-        event.preventDefault();
-
-        const machineName = document.getElementById("machine-name").value;
-        const issueDescription = document.getElementById("issue-description").value;
-        const maintenanceTherapy = document.getElementById("maintenance-therapy").checked;
-        const maintenancePeriodic = document.getElementById("maintenance-periodic").checked;
-        const maintenanceStructural = document.getElementById("maintenance-structural").checked;
-
-        if (!machineName || !issueDescription || (!maintenanceTherapy && !maintenancePeriodic && !maintenanceStructural)) {
-            alert("يرجى تعبئة جميع الحقول بشكل كامل.");
-            return false;
-        }
-
-        const currentDateTime = new Date().toLocaleString();
-
-        const request = {
-            machineName,
-            issueDescription,
-            maintenanceTypes: {
-                therapy: maintenanceTherapy,
-                periodic: maintenancePeriodic,
-                structural: maintenanceStructural
-            },
-            createdAt: currentDateTime
-        };
-
-        const pendingRequests = JSON.parse(localStorage.getItem("pendingRequests")) || [];
-        pendingRequests.push(request);
-        localStorage.setItem("pendingRequests", JSON.stringify(pendingRequests));
-
-        updateRequestDropdown();
-
-        window.location.href = 'service-request.html.html';
-    }
-
-    document.addEventListener("DOMContentLoaded", function() {
-        updateRequestDropdown();
-    });
-
-    function handleRequestSelection(event) {
-        const selectedRequestIndex = event.target.value;
-        if (selectedRequestIndex !== "") {
-            const requests = JSON.parse(localStorage.getItem("pendingRequests"));
-            const selectedRequest = requests[selectedRequestIndex];
-            sessionStorage.setItem("selectedRequest", JSON.stringify(selectedRequest));
-
-            window.location.href = 'صفحة إنهاء .html';
-        }
-    }
-</script>
+<script src="script.js"></script>
 
 </body>
 </html>
