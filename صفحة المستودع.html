@@ -194,7 +194,11 @@
 
     // عند تحميل الصفحة، نقوم بتحميل الطلبات
     document.addEventListener("DOMContentLoaded", loadRequests);
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        loadRequestsFromGoogleSheet();
+    });
+</script>
 <script src="script.js"></script>
-
 </body>
 </html>
