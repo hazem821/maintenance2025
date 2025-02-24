@@ -185,7 +185,27 @@
     }
 
     document.addEventListener("DOMContentLoaded", updateRequestDropdown);
-<script src="script.js"></script>
+<script>
+    document.getElementById("maintenanceForm").addEventListener("submit", function(e) {
+        e.preventDefault();
+        let requestData = {
+            action: "updateRequest",
+            receiverName: document.getElementById('receiver-name').value,
+            conditionDescription: document.getElementById('condition-description').value
+        };
 
+        fetch(API_URL, {
+            method: "POST",
+            body: JSON.stringify(requestData),
+            headers: { "Content-Type": "application/json" }
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert("تم تحديث الطلب بنجاح!");
+        })
+        .catch(error => console.error("Error:", error));
+    });
+</script>
+<script src="script.js"></script>
 </body>
 </html>
