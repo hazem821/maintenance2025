@@ -126,7 +126,27 @@
         // العودة إلى صفحة طالب الخدمة
         window.location.href = 'service-request.html.html';
     });
-<script src="script.js"></script>
+<script>
+    document.getElementById("finishForm").addEventListener("submit", function(e) {
+        e.preventDefault();
+        let requestData = {
+            action: "finishRequest",
+            confirmation: document.getElementById('confirmation').value
+        };
 
+        fetch(API_URL, {
+            method: "POST",
+            body: JSON.stringify(requestData),
+            headers: { "Content-Type": "application/json" }
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert("تم إنهاء الطلب بنجاح!");
+            window.location.href = 'service-request.html.html';
+        })
+        .catch(error => console.error("Error:", error));
+    });
+</script>
+<script src="script.js"></script>
 </body>
 </html>
