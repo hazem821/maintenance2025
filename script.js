@@ -1,5 +1,5 @@
 // استبدل هذا الرابط برابط API الخاص بـ Google Apps Script الذي حصلت عليه بعد النشر
-const API_URL = "https://script.google.com/macros/s/AKfycbxm8os_Z2KlGrNVZm_0SLmD_9yDD5WkLgFGGKJdcNiRZ1LTfrfcIO0dvJhe5zbYLRPCnQ/exec";
+const API_URL = "https://script.google.com/u/0/home/projects/1EnGfZnOesFXwuTOWm9LmAI1XLi7QluApNKSKL1ZU1JAMbJ2X49wUigNp/edit";
 
 // إرسال البيانات إلى Google Sheets عند إرسال النموذج
 document.getElementById('serviceForm').addEventListener('submit', function(e) {
